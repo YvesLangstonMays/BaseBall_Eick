@@ -1,0 +1,193 @@
+---
+title: "Task_1"
+format: pdf
+editor: visual
+---
+
+```{r}
+library(ggplot2)
+library(reshape2)
+library(corrplot)
+library(dplyr)
+```
+
+# Intro
+
+Importing the data set from github repo
+
+```{r}
+
+library(readr)
+url = "https://raw.githubusercontent.com/RaunakDune/3337_Fall2024_EDA/bf7b9ca17ed5e08ff25677c329ea1473cb935b49/Baseball_Databank_Teams_1871_2023_Modded.csv"
+
+data = read.csv(url)
+head(data, 3)
+attach(data)
+```
+
+# Covariance Matrices
+
+Covariance matrices for HR, ERA, R, RA, SOA
+
+```{r}
+selected_data = data[, c("HR", "ERA","R", "RA", "SOA")]
+covariance_matrix = cov(selected_data)
+
+cov_melted = melt(covariance_matrix)
+
+ggplot(cov_melted, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "white", mid = "lightblue", high = "blue", 
+                       midpoint = 0, limit = c(min(cov_melted$value), max(cov_melted$value))) +
+  theme_minimal() +
+  labs(title = "Baseball Covariance Heatmap", x = "Attributes", y = "Attributes", fill = "Covariance") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_text(aes(label = round(value, 2)), color = "black", size = 3)
+```
+
+# Correlation Matrices
+
+```{r}
+correlation_matrix = cor(selected_data)
+
+cor_melted = melt(correlation_matrix)
+
+ggplot(cor_melted, aes(Var1, Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "white", mid = "lightblue", high = "blue",
+                       limit = c(min(cor_melted$value), max(cor_melted$value))) +
+  theme_minimal() +
+  labs(title = "Baseball Correlation heatmap", x = "Attributes", y = "Attributes", fill = "Correlation") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  geom_text(aes(label = round(value, 2)), color = "black", size = 3)
+```
+
+# Interpretation of Correlation and Covariance Matrices
+
+SOA has a correlation of .80 with HR, suggesting that teams that strike out a lot of batters, also hit a lot of home runs. This could be because the strike outs are due to good pitchers, the same pitchers that batters will be practicing with, iron sharpening iron.
+
+The next highest correlation is 0.75 between ERA and RA. This is expected since ERA is a measure of a pitcher's effectiveness. If the pitcher is less effective at striking batters out, meaning the pitcher has a higher ERA, then there will be more runs scored, and a higher RA.
+
+Everything else is roughly 0.50 or less, and can be explained by domain knowledge.
+
+# Scatter Plot for AB/H and HA/BBA
+
+AB = At bats, H = hits by batters, HA = hits allows, BBA = walks allowed
+
+```{r}
+scatter.smooth(AB, H)
+scatter.smooth(HA, BBA)
+```
+
+At bats is a measure of how many times a team has had a batter at the plate. Hits tells us how many times a batter got a hit AND got to first base. If a batter hit the ball, and it was foul, it is not considered a hit. Only hits that result in placement on base count.
+
+Based on our AB/H plot, there is a strong positive correlation between the two, which is to be expected. There seems to be more variability in clusters around 2000, 4000, and 4700+ at bats.
+
+Walks allowed are recorded when a pitcher either hits a batter with the ball, or throws 4 balls outside of the strike zone without the batter swinging at them. Hits allowed is the offensive component of Hits. There seems to be a lot of variation between these two variables. I can't think of why right now.
+
+# Two Teams + Astros Histograms
+
+I will use the White Sox, Red Sox, and Astros. The histograms will be for the years 2004-2013 and 2014-2023. I will measure the High, Low, and Average.
+
+```{r}
+team_hist_data_2013_Boston = data %>%
+  filter(yearID <= 2013 & yearID >= 2004 & (name == "Boston Red Sox" | name == "Houston Astros")) %>%
+  select( name, TARGET)
+
+
+team_hist_data_2013_Chicago = data %>%
+  filter(yearID <= 2013 & yearID >= 2004 & (name == "Chicago White Sox" | name == "Houston Astros")) %>%
+  select(name, TARGET)
+
+
+ggplot(team_hist_data_2013_Chicago, aes(x = TARGET, fill = name)) + 
+  geom_bar(position = "dodge", color = "#002147", width = 0.2, alpha = 0.9) + 
+  scale_fill_manual(values = c("Chicago White Sox" = "#C4CED4", "Houston Astros" = "#D6492A")) +
+  labs(x = "Target", y = "Frequency", title = "Target Frequencies of White Sox & Astros 2004-2013") +
+  labs(fill = "Team") + 
+  theme_minimal() +
+    theme(
+    panel.grid.major = element_blank(),     
+    panel.grid.minor = element_blank(),      
+    panel.background = element_rect(fill = "#27252F")
+    ) +
+    geom_bar(aes(x = TARGET, fill = name), position = "dodge", width = 0.22, alpha = 0.1)
+
+```
+
+The White Sox had more average targets than the Astros and few low targets as well.
+
+```{r}
+
+ggplot(team_hist_data_2013_Boston, aes(x = TARGET, fill = name)) + 
+  geom_bar(position = "dodge", color = "#002147", width = 0.2, alpha = 0.9) + 
+  scale_fill_manual(values = c("Boston Red Sox" = "#BD3039", "Houston Astros" = "#D6492A")) +
+  labs(x = "Target", y = "Frequency", title = "Target Frequencies of Red Sox & Astros 2004-2013") +
+  labs(fill = "Team") + 
+  theme_minimal() +
+    theme(
+    panel.grid.major = element_blank(),     
+    panel.grid.minor = element_blank(),      
+    panel.background = element_rect(fill = "#27252F")
+    ) +
+    geom_bar(aes(x = TARGET, fill = name), position = "dodge", width = 0.22, alpha = 0.1)
+```
+
+The Red Sox had no low season targets within this 10 year period, while the astros had mixed seasons.
+
+# Box plots for BB and SB
+
+I will create box plots for BB and SB, each with TARGET ave, low, hi, and then each with the whole data set
+
+```{r}
+box_sb_hi = data %>%
+  filter(TARGET == "HIGH") %>%
+  select(TARGET, SB)
+
+box_sb_ave = data %>%
+  filter(TARGET == "AVERAGE") %>%
+  select(TARGET, SB)
+
+box_sb_low = data %>%
+  filter(TARGET == "LOW") %>%
+  select(TARGET, SB)
+
+
+
+box_bb_hi = data %>%
+  filter(TARGET == "HIGH") %>%
+  select(TARGET, BB)
+
+box_bb_ave = data %>%
+  filter(TARGET == "AVERAGE") %>%
+  select(TARGET, BB)
+
+box_bb_low = data %>%
+  filter(TARGET == "LOW") %>%
+  select(TARGET, BB)
+
+
+box_bb_all = data %>%
+  select(TARGET, BB)
+
+box_sb_all = data %>%
+  select(TARGET, SB)
+
+```
+
+```{r}
+ggplot(box_sb_hi, aes(x = TARGET, y = SB)) + 
+  geom_boxplot() + labs(title ="Target HIGH SB boxplot") 
+```
+
+```{r}
+ggplot(box_sb_ave, aes(x = TARGET, y = SB)) +
+  geom_boxplot() +
+  labs(title ="Target AVERAGE SB boxplot")
+```
+
+```{r}
+ggplot(box_sb_low, aes(x = TARGET, y = SB)) +
+  geom_boxplot() +
+  labs(title ="Target LOW SB boxplot")
+```
