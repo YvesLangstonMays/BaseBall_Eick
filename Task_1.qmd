@@ -9,7 +9,7 @@ editor: visual
 Importing the data set from github repo and loading libraries
 
 ```{r}
-
+#| results: hide
 library(readr)
 library(ggplot2)
 library(reshape2)
@@ -377,8 +377,7 @@ world_series <- data %>%
   )
 
 
-
-world_series <- world_series %>%
+world_series = world_series %>%
   left_join(data %>% select(name, W, L), by = "name")
 
 
@@ -387,7 +386,7 @@ teams = unique(world_series$name)
 for (team in teams) {
   team_data = world_series %>% filter(name == team)
   
-  p = ggplot(team_data) +
+  looped_plots = ggplot(team_data) +
     geom_histogram(aes(x = W, fill = "Wins"), binwidth = 1, alpha = 0.6, color = "black") +
     geom_histogram(aes(x = L, fill = "Losses"), binwidth = 1, alpha = 0.6, color = "black") +
     scale_fill_manual(values = c("blue", "red"), name = "Type", labels = c("Wins", "Losses")) +
@@ -402,7 +401,7 @@ for (team in teams) {
     legend.text = element_text(color = "white")
   )
   
-  print(p)
+  print(looped_plots)
 }
 
 
@@ -436,32 +435,25 @@ z_FP and z_SO are negatively correlated with the win percentage attribute, while
 
 ```{r}
 
-
-
-# Select columns 9 to 34 and 'TARGET'
 subset_data = data[, 9:ncol(data)]
 subset_data = na.omit(subset_data)
 subset_data$TARGET = as.factor(subset_data$TARGET)
 
-# Split data into training and testing sets (80-20 split)
 set.seed(123)
 train_index = sample(1:nrow(subset_data), 0.8 * nrow(subset_data))
 train_data = subset_data[train_index, ]
 test_data = subset_data[-train_index, ]
 
-# Build 3 decision tree models using the ranger library, ensuring 25 or fewer nodes
 tree_model1 = ranger(TARGET ~ ., data = train_data, num.trees = 1, max.depth = 5)
 tree_model2 = ranger(TARGET ~ ., data = train_data, num.trees = 1, min.node.size = 10)
 tree_model3 = ranger(TARGET ~ ., data = train_data, num.trees = 1, sample.fraction = 0.7)
 
-# Function to calculate accuracy
 calculate_accuracy = function(model, data) {
   predictions = predict(model, data)$predictions
   accuracy = sum(predictions == data$TARGET) / nrow(data)
   return(accuracy)
 }
 
-# Training and testing accuracy for each model
 train_acc_model1 = calculate_accuracy(tree_model1, train_data)
 test_acc_model1 = calculate_accuracy(tree_model1, test_data)
 
@@ -471,15 +463,26 @@ test_acc_model2 = calculate_accuracy(tree_model2, test_data)
 train_acc_model3 = calculate_accuracy(tree_model3, train_data)
 test_acc_model3 = calculate_accuracy(tree_model3, test_data)
 
-# Output Training and Testing Accuracy
 cat("model 1 training accuracy: ", train_acc_model1, "\n")
 cat("model 1 testing accuracy: ", test_acc_model1, "\n")
 
-cat("Model 2 - Training Accuracy: ", train_acc_model2, "\n")
-cat("Model 2 - Testing Accuracy: ", test_acc_model2, "\n")
+cat("model 2 training accuracy: ", train_acc_model2, "\n")
+cat("model 2 testing accuracy: ", test_acc_model2, "\n")
 
-cat("Model 3 - Training Accuracy: ", train_acc_model3, "\n")
-cat("Model 3 - Testing Accuracy: ", test_acc_model3, "\n")
+cat("model 3  training accuracy: ", train_acc_model3, "\n")
+cat("model 3  testing accuracy: ", test_acc_model3, "\n")
 
 
 ```
+
+# Conclusion
+
+Write a conclusion (at most 13 sentences!) summarizing the most important findings
+
+of this task; in particular, address the findings obtained related to predicting a
+
+successful team (both by Rank and Target) using attributes 7-30. If possible, write
+
+about which attributes seem useful for predicting good teams and what you as an
+
+individual can learn from this dataset! **6 points (and up to 4 extra points)**
