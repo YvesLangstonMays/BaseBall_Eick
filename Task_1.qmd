@@ -83,7 +83,7 @@ At bats is a measure of how many times a team has had a batter at the plate. Hit
 
 Based on our AB/H plot, there is a strong positive correlation between the two, which is to be expected. There seems to be more variability in clusters around 2000, 4000, and 4700+ at bats.
 
-Walks allowed are recorded when a pitcher either hits a batter with the ball, or throws 4 balls outside of the strike zone without the batter swinging at them. Hits allowed is the offensive component of Hits. There seems to be a lot of variation between these two variables. I can't think of why right now.
+Walks allowed are recorded when a pitcher either hits a batter with the ball, or throws 4 balls outside of the strike zone without the batter swinging at them. Hits allowed is the offensive component of Hits. There seems to be a lot of variation between these two variables, though there seems to be a clear positive correlation with a large concentration at roughly between 1500 to 1750 hits allowed.
 
 # 3. Two Teams + Astros Histograms
 
@@ -115,7 +115,7 @@ ggplot(team_hist_data_2013_Chicago, aes(x = TARGET, fill = name)) +
 
 ```
 
-The White Sox had more average targets than the Astros and few low targets as well.
+The White Sox had more average targets than the Astros and fewer low targets as well.
 
 ```{r}
 
@@ -133,7 +133,7 @@ ggplot(team_hist_data_2013_Boston, aes(x = TARGET, fill = name)) +
     geom_bar(aes(x = TARGET, fill = name), position = "dodge", width = 0.22, alpha = 0.1)
 ```
 
-The Red Sox had no low season targets within this 10 year period, while the astros had mixed seasons.
+The Red Sox had no low season targets within this 10 year period, and had higher average targets while the astros had mixed seasons.
 
 # 4. Box plots for BB and SB
 
@@ -325,13 +325,14 @@ ggplot(supervised_data, aes(x = IPouts, y = DP, color = TARGET)) +
   )
 ```
 
-Predicting target, based on the above scatterplots, will be very difficult. Each target is fairly well distributed through the x and y axes. It may be slightly easier to predict using the IPOuts and DP plot, with the exception of values above 4200
+Predicting target, based on the above scatterplots, will be very difficult. Each target is fairly well distributed through the x and y axes. The HB/SO plot seems to follow a curved C shaped pattern, though it might not indicate any relationship. The CG/SHO plot has its points evenly distributed from 0-75 CG and 0-15 SHO, the points begin to become farther apart. It may be slightly easier to predict using the IPOuts and DP plot, with the exception of values above 4200 where the values become more unpredictable.
 
 # 6. Density Plots W v E
 
 We will view density plots against Win Percentage W, and Errors per game E
 
 ```{r}
+
 density_data = data %>%
   select(W, E, TARGET)
 
@@ -367,6 +368,8 @@ There seems to be a very small difference in density for E when comparing high a
 # 7. World Series Wins Table
 
 ```{r}
+table(name[WSWin=="Y"], TARGET[WSWin=="Y"])
+
 world_series <- data %>%
   filter(WSWin == "Y") %>%
   select(name, WSWin) %>%
@@ -407,6 +410,8 @@ for (team in teams) {
 
 
 ```
+
+The table shows no lows which makes sense because the teams must be able to make higher winning percentages in order to win the world series. Most of these winning percentages are average though, and the frequency of these Highs and Average stay under 4 for the most part. The histograms are highly variable but many follow a clear trend of a peak or peak(s) for both wins and losses. And wins and losses tend to follow the same pattern per team. If wins for a team is peak shaped the losses are too. If wins follow no pattern, the losses follow no pattern.
 
 # 8. Transformed Data
 
