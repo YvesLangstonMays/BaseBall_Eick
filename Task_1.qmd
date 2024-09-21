@@ -480,6 +480,8 @@ cat("model 3  testing accuracy: ", test_acc_model3, "\n")
 
 ```
 
+Model 1 limited the number of nodes in the tree by controlling its depth using the max.depth parameter. Model 2 limited the number of nodes by setting the min.node.size parameter. A minimum of 10 observations were required in each leaf node before a spit could occur. In model 3, the number of nodes was limited by setting sample.fraction = 0.7, limiting the amount of data used for training to 70%. The training and testing accuracies for model 1 were 93.27% and 89.37%, for model 2 95.10% and 89.70%, and for model 3 93.27% and 89.04%. From the trees, attributes 26 (SV), 22 (ER), 21 (RA), 9 (R), and 14 (HR) have the most influence in distinguishing between high/average/low in attribute 35 (Target). This is because they appear near the top of the trees.
+
 # Conclusion
 
 Write a conclusion (at most 13 sentences!) summarizing the most important findings
