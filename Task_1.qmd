@@ -495,7 +495,7 @@ The second model was designed to prevent the tree from splitting too often by en
 
 The third model was designed so that a smaller CP (like 0.01) allows the model to prune less impactful splits, reducing the number of nodes in the tree. This approach helps ensure that only the most meaningful splits remain.
 
-The decision trees highlight the importance of key attributes like **Runs Allowed (RA)**, consistently the first split, indicating that preventing runs is the most crucial factor in classification. Some other important attributes include **Saves (SV)**, **Home Runs (HR)**, and **Strikeouts (SO)**.
+The three decision trees reflect how different hyperparameters influence the model's structure and performance in classifying the target variable ('average,' 'high,' 'low'). The results show that **Model 2** has the highest training and testing accuracy, suggesting it captures more patterns in the data.
 
 # Conclusion
 
