@@ -1,5 +1,6 @@
 ---
 title: "Task_1"
+author: Ny Dang, Yves-langston Mays, Uyen Vi Phan, Connie Yang
 format: pdf
 editor: visual
 ---
@@ -499,12 +500,8 @@ The three decision trees reflect how different hyperparameters influence the mod
 
 # Conclusion
 
-Write a conclusion (at most 13 sentences!) summarizing the most important findings
+The analysis of attributes 7-30 for predicting a successful team, based on both Rank and Target, highlights key findings. Attributes like Winning Percentage (WP), Runs scored (R), and Earned run average (ERA) emerged as strong predictors of success. Teams with higher Winning Percentages (WP) generally ranked higher and fell into the "HIGH" category for Target, indicating strong overall performance.
 
-of this task; in particular, address the findings obtained related to predicting a
+Other offensive metrics, such as Hits (H), Home Runs (HR), and Doubles (2B), also contributed to team success by boosting scoring opportunities. On the defensive side, Earned runs allowed (ER), Shutouts (SHO), and Strikeouts by pitchers (SOA) were important in limiting opponents’ scoring chances, directly impacting a team’s Rank and Target outcomes.
 
-successful team (both by Rank and Target) using attributes 7-30. If possible, write
-
-about which attributes seem useful for predicting good teams and what you as an
-
-individual can learn from this dataset! **6 points (and up to 4 extra points)**
+The findings suggest that a combination of both offensive and defensive strategies is essential for predicting a good team. Specifically, teams that excel in scoring while minimizing opponent runs perform better. This dataset reveals that a balanced focus on both aspects is key to predicting team success. By analyzing these attributes, one can learn the importance of comprehensive team dynamics rather than just individual performance, helping refine strategies for evaluating team success.
