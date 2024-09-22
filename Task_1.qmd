@@ -10,6 +10,7 @@ Importing the data set from github repo and loading libraries
 
 ```{r}
 #| results: hide
+#| warning: false
 library(readr)
 library(ggplot2)
 library(reshape2)
@@ -17,6 +18,8 @@ library(corrplot)
 library(dplyr)
 library(tidyr)
 library(ranger)
+library(rpart)
+library(rpart.plot)
 
 url = "https://raw.githubusercontent.com/RaunakDune/3337_Fall2024_EDA/bf7b9ca17ed5e08ff25677c329ea1473cb935b49/Baseball_Databank_Teams_1871_2023_Modded.csv"
 
@@ -133,7 +136,7 @@ ggplot(team_hist_data_2013_Boston, aes(x = TARGET, fill = name)) +
     geom_bar(aes(x = TARGET, fill = name), position = "dodge", width = 0.22, alpha = 0.1)
 ```
 
-The Red Sox had no low season targets within this 10 year period, and had higher average targets while the astros had mixed seasons.
+The Red Sox had no low season targets within this 10 year period, and had higher average targets while the Astros had mixed seasons.
 
 # 4. Box plots for BB and SB
 
@@ -142,6 +145,7 @@ I will create box plots for BB and SB, each with TARGET ave, low, hi, and then e
 BB is walks by batters, while SB is stolen bases.
 
 ```{r}
+#| warning: false
 box_sb_hi = data %>%
   filter(TARGET == "HIGH") %>%
   select(TARGET, SB)
@@ -278,6 +282,7 @@ On average, BB seems to have a fairly wide distribution with the fewest amount o
 # 5. Supervised Scatterplot for HB/SO, CG/SHO, IPOuts/DP
 
 ```{r}
+#| warning: false
 supervised_data = data %>%
   select(HBP, SO, CG, SHO, IPouts, DP, TARGET)
 
@@ -332,7 +337,7 @@ Predicting target, based on the above scatterplots, will be very difficult. Each
 We will view density plots against Win Percentage W, and Errors per game E
 
 ```{r}
-
+#| warning: false
 density_data = data %>%
   select(W, E, TARGET)
 
@@ -368,6 +373,7 @@ There seems to be a very small difference in density for E when comparing high a
 # 7. World Series Wins Table
 
 ```{r}
+#| warning: false
 table(name[WSWin=="Y"], TARGET[WSWin=="Y"])
 
 world_series <- data %>%
@@ -439,22 +445,26 @@ z_FP and z_SO are negatively correlated with the win percentage attribute, while
 # 9. Decision Trees
 
 ```{r}
-
 subset_data = data[, 9:ncol(data)]
 subset_data = na.omit(subset_data)
 subset_data$TARGET = as.factor(subset_data$TARGET)
 
 set.seed(123)
+
 train_index = sample(1:nrow(subset_data), 0.8 * nrow(subset_data))
 train_data = subset_data[train_index, ]
 test_data = subset_data[-train_index, ]
 
-tree_model1 = ranger(TARGET ~ ., data = train_data, num.trees = 1, max.depth = 5)
-tree_model2 = ranger(TARGET ~ ., data = train_data, num.trees = 1, min.node.size = 10)
-tree_model3 = ranger(TARGET ~ ., data = train_data, num.trees = 1, sample.fraction = 0.7)
+tree_model1 = rpart(TARGET ~ ., data = train_data, control = rpart.control(maxdepth = 5))
+tree_model2 = rpart(TARGET ~ ., data = train_data, control = rpart.control(minsplit = 10))
+tree_model3 = rpart(TARGET ~ ., data = train_data, control = rpart.control(cp = 0.01))
+
+rpart.plot(tree_model1, main = "Decision Tree Model 1 (Max Depth = 5)")
+rpart.plot(tree_model2, main = "Decision Tree Model 2 (Min Split = 10)")
+rpart.plot(tree_model3, main = "Decision Tree Model 3 (CP = 0.01)")
 
 calculate_accuracy = function(model, data) {
-  predictions = predict(model, data)$predictions
+  predictions = predict(model, data, type = "class")
   accuracy = sum(predictions == data$TARGET) / nrow(data)
   return(accuracy)
 }
@@ -468,19 +478,24 @@ test_acc_model2 = calculate_accuracy(tree_model2, test_data)
 train_acc_model3 = calculate_accuracy(tree_model3, train_data)
 test_acc_model3 = calculate_accuracy(tree_model3, test_data)
 
-cat("model 1 training accuracy: ", train_acc_model1, "\n")
-cat("model 1 testing accuracy: ", test_acc_model1, "\n")
+cat("Model 1 Training Accuracy: ", train_acc_model1, "\n")
+cat("Model 1 Testing Accuracy: ", test_acc_model1, "\n")
 
-cat("model 2 training accuracy: ", train_acc_model2, "\n")
-cat("model 2 testing accuracy: ", test_acc_model2, "\n")
+cat("Model 2 Training Accuracy: ", train_acc_model2, "\n")
+cat("Model 2 Testing Accuracy: ", test_acc_model2, "\n")
 
-cat("model 3  training accuracy: ", train_acc_model3, "\n")
-cat("model 3  testing accuracy: ", test_acc_model3, "\n")
-
+cat("Model 3 Training Accuracy: ", train_acc_model3, "\n")
+cat("Model 3 Testing Accuracy: ", test_acc_model3, "\n")
 
 ```
 
-Model 1 limited the number of nodes in the tree by controlling its depth using the max.depth parameter. Model 2 limited the number of nodes by setting the min.node.size parameter, a minimum of 10 observations were required in each leaf node before a spit could occur. In model 3, the number of nodes was limited by setting sample.fraction = 0.7, limiting the amount of data used for training to 70%. The training and testing accuracies for model 1 were 93.27% and 89.37%, for model 2 95.10% and 89.70%, and for model 3 93.27% and 89.04%. From the trees, attributes 26 (SV), 22 (ER), 21 (RA), 9 (R), and 14 (HR) have the most influence in distinguishing between high/average/low in attribute 35 (Target). This is because they appear near the top of the trees.
+By capping the depth for the first model, we ensure that the tree remains relatively simple and doesn’t overfit the training data by learning highly specific, potentially noisy patterns. In essence, it prevents the tree from becoming overly complex while still being able to capture significant patterns in the data.
+
+The second model was designed to prevent the tree from splitting too often by enforcing a minimum node size of 10 (i.e., a split will only happen if at least 10 observations are present in a node). By doing this, we reduce the likelihood of small, insignificant splits that might overfit to minor fluctuations in the data.
+
+The third model was designed so that a smaller CP (like 0.01) allows the model to prune less impactful splits, reducing the number of nodes in the tree. This approach helps ensure that only the most meaningful splits remain.
+
+The three decision trees reflect how different hyperparameters influence the model's structure and performance in classifying the target variable ('average,' 'high,' 'low'). The results show that **Model 2** has the highest training and testing accuracy, suggesting it captures more patterns in the data.
 
 # Conclusion
 
