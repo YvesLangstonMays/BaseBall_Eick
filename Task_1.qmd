@@ -499,12 +499,10 @@ The three decision trees reflect how different hyperparameters influence the mod
 
 # Conclusion
 
-Write a conclusion (at most 13 sentences!) summarizing the most important findings
+In this analysis of various attributes and relationships, several attributes were found to contribute to predicting a successful team based on both the winning percentage and target attributes. First, the correlations between SOA and HR as well as between ERA and RA suggest that pitching and offensive strength play significant roles in determining team success. The strong positive relationship between at-bats and hits further confirms the expected outcome that teams with more offensive opportunities tend to score more frequently. For instances where the Target attribute is HIGH, boxplot analysis revealed that both BB and SB distributions were more right-skewed compared to AVERAGE and LOW Targets, indicating that teams with more offensive opportunities tend to perform better overall.
 
-of this task; in particular, address the findings obtained related to predicting a
+The analysis of World Series-winning teams showed that none had low Target classes, and histograms for W and L indicated a strong relationship between high winning percentages and consistent performance metrics, reflecting that successful teams generally maintain a balance in their performance.
 
-successful team (both by Rank and Target) using attributes 7-30. If possible, write
+In the analysis of the Z-Processed Baseball Databank where 30.6% of the variation in winning percentage was accounted for, the linear model revealed that the attributes z_H, z_SOA, and z_SHO, exhibited positive correlations, indicating that improvements in these areas can enhance a team's winning percentage. From decision tree analysis, attributes SV, ER, RA, R, and HR appeared as key nodes, indicating that they had the most influence in distinguishing between high/average/low in the Target attribute.
 
-about which attributes seem useful for predicting good teams and what you as an
-
-individual can learn from this dataset! **6 points (and up to 4 extra points)**
+However, predicting team success based on individual attributes remains challenging as scatter plots using attributes like HB/SO, CG/SHO, and IPOuts/DP showed difficulty in distinguishing between target classes. Overall, attributes like SOA, HR, ERA, and at-bats stand out as valuable indicators of a successful team.
